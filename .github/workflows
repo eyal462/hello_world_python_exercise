@@ -1,31 +1,26 @@
-name: Build and push Docker image
+name: Build and Deploy Docker Container
 
 on:
   push:
     branches:
       - main
 
-env:
-  IMAGE_NAME: your-image-name
-  REGISTRY: ghcr.io
-
 jobs:
-  build-and-push:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v2
-      
-      - name: Login to container registry
-        uses: docker/login-action@v1
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ secrets.USERNAME}}
-          password: ${{ secrets.PASSWORD }}
-          
-      - name: Build and push Docker image
+
+      - name: Build Docker Image
         uses: docker/build-push-action@v2
         with:
           context: .
           push: true
-          tags: ${{ env.REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          tags: ghcr.io/eyal462/sonypython:latest
+
+      - name: Run Docker Container
+        uses: docker/compose-action@v1
+        with:
+          compose_file: docker-compose.yml
+          command: up -d
